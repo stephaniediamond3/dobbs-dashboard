@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Abortion Rights Post-Dobbs Dashboard</title>
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a2e;
+    }
+    header {
+      background: #1a1a2e;
+      color: #fff;
+      padding: 28px 40px;
+      text-align: center;
+      border-bottom: 4px solid #c0392b;
+    }
+    header h1 { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.3px; }
+    header p  { font-size: 0.9rem; opacity: 0.7; margin-top: 8px; }
+    .dashboard {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 22px 24px 10px;
+    }
+    .card h2 { font-size: 1.05rem; font-weight: 700; color: #1a1a2e; }
+    .card p.sub { font-size: 0.82rem; color: #888; margin-top: 3px; margin-bottom: 8px; }
+    .intro-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 28px 32px;
+      max-width: 860px;
+    }
+    .intro-card p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #2c2c3a;
+      margin-bottom: 14px;
+    }
+    .intro-card p:last-child { margin-bottom: 0; }
+    .bar-footnote { font-size: 0.78rem; color: #999; margin-top: 2px; padding: 0 4px 10px; }
+    .maps-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 960px) { .maps-row { grid-template-columns: 1fr; } }
+    footer {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #aaa;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Abortion Rights in the United States Following the <em>Dobbs v. Jackson</em> Decision</h1>
+  <p>State-level analysis of abortion access, legal status, and post-<em>Dobbs</em> legislative changes &nbsp;|&nbsp; Data as of December 2024</p>
+</header>
+
+<div class="dashboard">
+
+  <!-- Intro Text -->
+  <div class="intro-card">
+    <p>On June 24, 2022, the U.S. Supreme Court issued its ruling in <em>Dobbs v. Jackson Women's Health Organization</em> (597 U.S. 215), a landmark decision that fundamentally restructured the legal landscape of abortion in the United States. In a 6–3 decision, the Court overturned <em>Roe v. Wade</em> (1973) and <em>Planned Parenthood v. Casey</em> (1992), eliminating the constitutional right to abortion that had been federally protected for nearly fifty years.</p>
+    <p>Under <em>Roe</em>, states were prohibited from banning abortion prior to fetal viability — the point at which a fetus can survive outside the womb, generally understood as falling between 20 and 24 weeks of pregnancy. The <em>Dobbs</em> decision reversed this precedent, holding that the Constitution does not confer a right to abortion and returning full authority to regulate it to individual states.</p>
+    <p>The effects were immediate and far-reaching. States with pre-existing trigger bans — laws written specifically to take effect upon the reversal of <em>Roe</em> — enacted restrictions within days of the ruling. Others passed new legislation in the months and years that followed, either further restricting access or moving to affirmatively protect it. The result is a deeply fragmented legal landscape in which abortion access varies dramatically depending on where a person lives. The visualizations below document that landscape as of December 2024.</p>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="card">
+    <h2>State Classification: Restrictive vs. Not Restrictive</h2>
+    <p class="sub">States are classified as <strong>Restrictive</strong> if abortion is banned prior to fetal viability<sup>*</sup> and <strong>Not Restrictive</strong> if abortion is legal up to fetal viability. Hover over bars to see which states fall in each category.</p>
+    <div id="bar-chart"></div>
+    <p class="bar-footnote"><sup>*</sup> Fetal viability is generally defined as 20–24 weeks of pregnancy, with the threshold varying by state.</p>
+  </div>
+
+  <!-- Two Maps -->
+  <div class="maps-row">
+    <div class="card">
+      <h2>Abortion Rights Status by State</h2>
+      <p class="sub">States are shaded by their specific abortion access status, ranging from a total ban to legal access with no gestational limit. Hover over any state to see its classification and exact legal status.</p>
+      <div id="rights-map"></div>
+    </div>
+    <div class="card">
+      <h2>Post-<em>Dobbs</em> Legislative Changes</h2>
+      <p class="sub">Many states had pre-existing trigger bans — laws written to automatically restrict abortion upon the reversal of <em>Roe v. Wade</em> — while others passed new legislation in response to <em>Dobbs</em>. Hover over any state to see whether and how its laws changed; dates reflect when new laws took effect, rounded to the nearest month.</p>
+      <div id="change-map"></div>
+    </div>
+  </div>
+
+  <!-- Concluding Text -->
+  <div class="intro-card">
+    <p>The picture presented here is necessarily simplified. Even within the categories shown, the practical landscape of abortion access is considerably more complex. Most states with bans or restrictions include some exceptions — for the life or health of the pregnant person, for cases of rape or incest, or for severe fetal anomalies — but the scope and enforceability of those exceptions vary widely from state to state, and in some cases have been the subject of their own legal battles. These distinctions are not captured in the visuals above.</p>
+    <p>Also not reflected here are the many legislative and judicial efforts that did not ultimately succeed. Since 2022, a number of states have seen attempted abortion restrictions fail in court, stall in the legislature, or be defeated through ballot referenda — in some cases in states that might otherwise be expected to restrict access. The resilience of abortion rights in several states, and the ongoing legal challenges to restrictions in others, speak to how actively contested this landscape remains.</p>
+    <p>Taken together, these visuals offer a high-level snapshot of how abortion access in the United States has shifted in the roughly two and a half years since <em>Dobbs</em>. They illustrate the broad contours of a transformed legal landscape — but the full picture is one of ongoing litigation, legislative activity, and change.</p>
+  </div>
+
+</div>
+
+<footer>Source: State legislative records post-<em>Dobbs v. Jackson Women's Health Organization</em>, 597 U.S. 215 (2022).</footer>
+
+<script>
+// ---------------------------------------------------------------------------
+// DATA
+// ---------------------------------------------------------------------------
+const raw = [
+  {state:'Alabama',       abbr:'AL', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Alaska',        abbr:'AK', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'No Change',    ctC:1, note:''},
+  {state:'Arizona',       abbr:'AZ', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:'10/2022–10/2024: restrictive; 11/2024+: not restrictive'},
+  {state:'Arkansas',      abbr:'AR', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'California',    abbr:'CA', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Colorado',      abbr:'CO', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'Connecticut',   abbr:'CT', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Delaware',      abbr:'DE', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Florida',       abbr:'FL', cls:'Restrictive',     ar:'Ban after 6 weeks',               arC:1, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Georgia',       abbr:'GA', cls:'Restrictive',     ar:'Ban after 6 weeks',               arC:1, ct:'Restricted',   ctC:0, note:'as of 8/2022'},
+  {state:'Hawaii',        abbr:'HI', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Idaho',         abbr:'ID', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 9/2022'},
+  {state:'Illinois',      abbr:'IL', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Indiana',       abbr:'IN', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 9/2023'},
+  {state:'Iowa',          abbr:'IA', cls:'Restrictive',     ar:'6 Weeks',                         arC:2, ct:'Restricted',   ctC:0, note:'as of 8/2024'},
+  {state:'Kansas',        abbr:'KS', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'No Change',    ctC:1, note:''},
+  {state:'Kentucky',      abbr:'KY', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:''},
+  {state:'Louisiana',     abbr:'LA', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:''},
+  {state:'Maine',         abbr:'ME', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Maryland',      abbr:'MD', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'Massachusetts', abbr:'MA', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Michigan',      abbr:'MI', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Minnesota',     abbr:'MN', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'Mississippi',   abbr:'MS', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:''},
+  {state:'Missouri',      abbr:'MO', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:'Restrictive 7/2022–11/2024; not restrictive 12/2024+'},
+  {state:'Montana',       abbr:'MT', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'Nebraska',      abbr:'NE', cls:'Restrictive',     ar:'Ban after 11 weeks, 6 days',      arC:3, ct:'Restricted',   ctC:0, note:'as of 6/2023'},
+  {state:'Nevada',        abbr:'NV', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'New Hampshire', abbr:'NH', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Restricted',   ctC:0, note:''},
+  {state:'New Jersey',    abbr:'NJ', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'New Mexico',    abbr:'NM', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'New York',      abbr:'NY', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'North Carolina',abbr:'NC', cls:'Restrictive',     ar:'Ban after 12 weeks',              arC:4, ct:'Restricted',   ctC:0, note:'as of 7/2023'},
+  {state:'North Dakota',  abbr:'ND', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'Restrictive 5/2023–8/2024 & 12/2024+; not restrictive 9–11/2024'},
+  {state:'Ohio',          abbr:'OH', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:'Restrictive 7–8/2022; not restrictive 9/2022+'},
+  {state:'Oklahoma',      abbr:'OK', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Oregon',        abbr:'OR', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'Pennsylvania',  abbr:'PA', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'No Change',    ctC:1, note:''},
+  {state:'Rhode Island',  abbr:'RI', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'South Carolina',abbr:'SC', cls:'Restrictive',     ar:'Ban after 6 weeks',               arC:1, ct:'Restricted',   ctC:0, note:'as of 9/2023'},
+  {state:'South Dakota',  abbr:'SD', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Tennessee',     abbr:'TN', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Texas',         abbr:'TX', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 9/2022'},
+  {state:'Utah',          abbr:'UT', cls:'Restrictive',     ar:'Ban at 18 weeks',                 arC:5, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  {state:'Vermont',       abbr:'VT', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+  {state:'Virginia',      abbr:'VA', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'No Change',    ctC:1, note:''},
+  {state:'Washington',    abbr:'WA', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:''},
+  {state:'West Virginia', abbr:'WV', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:''},
+  {state:'Wisconsin',     abbr:'WI', cls:'Not Restrictive', ar:'Legal before viability',          arC:6, ct:'Strengthened', ctC:2, note:'Restrictive 7/2022–9/2023; not restrictive 10/2023+'},
+  {state:'Wyoming',       abbr:'WY', cls:'Restrictive',     ar:'Total Ban',                       arC:0, ct:'Restricted',   ctC:0, note:'as of 7/2022'},
+  // DC appears in data but not on standard US state map
+  {state:'District of Columbia', abbr:'DC', cls:'Not Restrictive', ar:'Legal with no gestational limit', arC:7, ct:'Strengthened', ctC:2, note:''},
+];
+
+// ---------------------------------------------------------------------------
+// COLOR PALETTES
+// ---------------------------------------------------------------------------
+// Abortion Rights: 8 ordered categories, dark red → dark green
+const arLabels = [
+  'Total Ban',
+  'Ban after 6 weeks',
+  '6 Weeks',
+  'Ban after 11 weeks, 6 days',
+  'Ban after 12 weeks',
+  'Ban at 18 weeks',
+  'Legal before viability',
+  'Legal with no gestational limit'
+];
+const arColors = [
+  '#67000d', // 0 – Total Ban
+  '#a50f15', // 1 – Ban after 6 weeks
+  '#a50f15', // 2 – 6 Weeks (same color as ban after 6 weeks)
+  '#fc8d59', // 3 – Ban after 11 weeks, 6 days
+  '#fc8d59', // 4 – Ban after 12 weeks
+  '#fc8d59', // 5 – Ban at 18 weeks
+  '#74c476', // 6 – Legal before viability
+  '#006d2c'  // 7 – Legal with no gestational limit
+];
+
+// Change Type: 3 categories
+const ctLabels = ['Restricted', 'No Change', 'Strengthened'];
+const ctColors = ['#a50f15', '#bdbdbd', '#006d2c'];
+
+// Build discrete colorscale for Plotly (sharp steps, no interpolation)
+function discreteColorscale(colors) {
+  const n = colors.length;
+  const cs = [];
+  colors.forEach((c, i) => {
+    cs.push([i / (n - 1), c]);
+  });
+  return cs;
+}
+
+// Helper: build hover text (includeChange=true for the change map)
+function hoverText(d, includeChange = false) {
+  let txt = `<b>${d.state}</b><br>Class: ${d.cls}<br>Abortion Rights: ${d.ar}`;
+  if (includeChange) txt += `<br>Change: ${d.ct}`;
+  if (d.note) txt += `<br><i>${d.note}</i>`;
+  return txt;
+}
+
+// ---------------------------------------------------------------------------
+// CHART 1 – STACKED BAR CHART
+// ---------------------------------------------------------------------------
+(function buildBar() {
+  // Condensed categories for the bar chart
+  const barLabels = [
+    'Total Ban',
+    'Ban after 6 weeks',
+    'Ban after 12–18 weeks',
+    'Legal before viability',
+    'Legal with no gestational limit'
+  ];
+  const barColors = [
+    '#67000d', // Total Ban
+    '#a50f15', // Ban at or after 6 weeks
+    '#fc8d59', // Ban after 12–18 weeks
+    '#74c476', // Legal before viability
+    '#006d2c'  // Legal with no gestational limit
+  ];
+
+  // Map original 8-level arC to 5 condensed bar categories
+  function toBarC(arC) {
+    if (arC === 0) return 0;
+    if (arC === 1 || arC === 2) return 1;
+    if (arC >= 3 && arC <= 5) return 2;
+    if (arC === 6) return 3;
+    return 4;
+  }
+
+  const classes = ['Restrictive', 'Not Restrictive'];
+
+  const traces = barLabels.map((label, code) => {
+    const vals = classes.map(cls => {
+      const states = raw.filter(d => d.cls === cls && toBarC(d.arC) === code).map(d => d.state);
+      return { count: states.length, states };
+    });
+    return {
+      name: label,
+      type: 'bar',
+      x: classes,
+      y: vals.map(v => v.count),
+      marker: { color: barColors[code], line: { color: '#fff', width: 1.2 } },
+      customdata: vals.map(v => v.states.length ? v.states.join('<br>') : ''),
+      hovertemplate: vals.map(v =>
+        v.states.length
+          ? '<b>%{x}</b><br>' + label + ': %{y} state(s)<br>%{customdata}<extra></extra>'
+          : '<extra></extra>'
+      ),
+    };
+  });
+
+  const layout = {
+    barmode: 'stack',
+    height: 380,
+    margin: { t: 10, b: 50, l: 40, r: 20 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    xaxis: {
+      tickfont: { size: 13, family: 'Segoe UI, system-ui, sans-serif' },
+      tickangle: 0,
+      fixedrange: true,
+    },
+    yaxis: {
+      tickfont: { size: 12 },
+      showgrid: false,
+      fixedrange: true,
+    },
+    legend: {
+      title: { text: '<b>Abortion Rights Status</b>', font: { size: 11 } },
+      font: { size: 11 },
+      bgcolor: 'rgba(255,255,255,0.85)',
+      bordercolor: '#ddd',
+      borderwidth: 1,
+      orientation: 'v',
+      x: 1.01,
+      y: 1,
+      xanchor: 'left',
+    },
+    hoverlabel: { font: { family: 'Segoe UI, system-ui, sans-serif', size: 12 } },
+  };
+
+  Plotly.newPlot('bar-chart', traces, layout, { responsive: true, displayModeBar: false });
+})();
+
+// ---------------------------------------------------------------------------
+// CHART 2 – ABORTION RIGHTS CHOROPLETH MAP
+// ---------------------------------------------------------------------------
+(function buildRightsMap() {
+  // 5-category system: 3 restrictive groups + 2 non-restrictive groups
+  const mapArLabels = [
+    'Total Ban',
+    'Ban after 6 weeks',
+    'Ban after 12–18 weeks',
+    'Legal before viability',
+    'Legal with no gestational limit'
+  ];
+  const mapArColors = ['#67000d', '#a50f15', '#fc8d59', '#74c476', '#006d2c'];
+
+  function toMapArC(arC) {
+    if (arC === 0) return 0;
+    if (arC <= 2) return 1;
+    if (arC <= 5) return 2;
+    if (arC === 6) return 3;
+    return 4;
+  }
+
+  const mapStates = raw.filter(d => d.abbr !== 'DC');
+
+  const trace = {
+    type: 'choropleth',
+    locationmode: 'USA-states',
+    locations: mapStates.map(d => d.abbr),
+    z: mapStates.map(d => toMapArC(d.arC)),
+    text: mapStates.map(d => `<b>${d.state}</b><br>Class: ${d.cls}<br>Abortion Rights: ${d.ar}`),
+    hovertemplate: '%{text}<extra></extra>',
+    colorscale: discreteColorscale(mapArColors),
+    zmin: 0,
+    zmax: 4,
+    marker: { line: { color: '#ffffff', width: 1.5 } },
+    showscale: false,
+    showlegend: false,
+  };
+
+  // Dummy scatter traces — one per category — to drive the discrete legend boxes
+  const legendTraces = mapArLabels.map((label, i) => ({
+    type: 'scattergeo',
+    lon: [null],
+    lat: [null],
+    mode: 'markers',
+    name: label,
+    marker: { color: mapArColors[i], size: 14, symbol: 'square', line: { width: 0 } },
+    showlegend: true,
+    hoverinfo: 'skip',
+  }));
+
+  const layout = {
+    geo: {
+      scope: 'usa',
+      showlakes: false,
+      showland: true,
+      landcolor: '#f5f5f5',
+      bgcolor: 'rgba(0,0,0,0)',
+      coastlinecolor: '#aaa',
+      countrycolor: '#aaa',
+    },
+    legend: {
+      font: { size: 11, family: 'Segoe UI, system-ui, sans-serif' },
+      bgcolor: 'rgba(255,255,255,0.85)',
+      bordercolor: '#ddd',
+      borderwidth: 1,
+      x: 1.01,
+      y: 0.5,
+      xanchor: 'left',
+      yanchor: 'middle',
+    },
+    height: 380,
+    margin: { t: 5, b: 5, l: 0, r: 0 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    hoverlabel: { font: { family: 'Segoe UI, system-ui, sans-serif', size: 12 } },
+  };
+
+  Plotly.newPlot('rights-map', [trace, ...legendTraces], layout, { responsive: true, displayModeBar: false });
+})();
+
+// ---------------------------------------------------------------------------
+// CHART 3 – CHANGE TYPE CHOROPLETH MAP
+// ---------------------------------------------------------------------------
+(function buildChangeMap() {
+  const mapStates = raw.filter(d => d.abbr !== 'DC');
+
+  const trace = {
+    type: 'choropleth',
+    locationmode: 'USA-states',
+    locations: mapStates.map(d => d.abbr),
+    z: mapStates.map(d => d.ctC),
+    text: mapStates.map(d => hoverText(d, true)),
+    hovertemplate: '%{text}<extra></extra>',
+    colorscale: discreteColorscale(ctColors),
+    zmin: 0,
+    zmax: 2,
+    marker: { line: { color: '#ffffff', width: 1.5 } },
+    showscale: false,
+    showlegend: false,
+  };
+
+  // Dummy scatter traces for discrete legend boxes — Restricted, Strengthened, No Change
+  const legendItems = [
+    { label: 'Laws Restricted',   color: ctColors[0] },
+    { label: 'Laws Strengthened', color: ctColors[2] },
+    { label: 'No Change',         color: ctColors[1] },
+  ];
+  const legendTraces = legendItems.map(item => ({
+    type: 'scattergeo',
+    lon: [null],
+    lat: [null],
+    mode: 'markers',
+    name: item.label,
+    marker: { color: item.color, size: 14, symbol: 'square', line: { width: 0 } },
+    showlegend: true,
+    hoverinfo: 'skip',
+  }));
+
+  const layout = {
+    geo: {
+      scope: 'usa',
+      showlakes: false,
+      showland: true,
+      landcolor: '#f5f5f5',
+      bgcolor: 'rgba(0,0,0,0)',
+      coastlinecolor: '#aaa',
+      countrycolor: '#aaa',
+    },
+    legend: {
+      font: { size: 11, family: 'Segoe UI, system-ui, sans-serif' },
+      bgcolor: 'rgba(255,255,255,0.85)',
+      bordercolor: '#ddd',
+      borderwidth: 1,
+      x: 1.01,
+      y: 0.5,
+      xanchor: 'left',
+      yanchor: 'middle',
+    },
+    height: 380,
+    margin: { t: 5, b: 5, l: 0, r: 0 },
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    hoverlabel: { font: { family: 'Segoe UI, system-ui, sans-serif', size: 12 } },
+  };
+
+  Plotly.newPlot('change-map', [trace, ...legendTraces], layout, { responsive: true, displayModeBar: false });
+})();
+</script>
+
+</body>
+</html>
